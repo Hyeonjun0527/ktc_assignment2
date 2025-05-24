@@ -9,7 +9,9 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.ArrayList;
 
 @Repository
 @RequiredArgsConstructor
@@ -29,15 +31,15 @@ public class JdbcPlanRepository implements PlanRepository {
 
     @Override
     public PlanResponseDto findById(Long id) {
-        String sql = "SELECT *" +
+        String sql = "SELECT * " +
                      "FROM Plan p " +
                      "WHERE p.id = ?";
         try {
             return jdbc.queryForObject(sql, (rs, rowNum) -> new PlanResponseDto(
                     rs.getLong("id"),
                     rs.getString("content"),
-                    rs.getString("writer"),
-                    rs.getTimestamp("createdAt").toLocalDateTime(),
+                    rs.getString("writer_name"),
+                    rs.getTimestamp("created_at").toLocalDateTime(),
                     rs.getTimestamp("modified_at").toLocalDateTime()
             ), id);
         } catch (EmptyResultDataAccessException e) {
@@ -55,7 +57,7 @@ public class JdbcPlanRepository implements PlanRepository {
                     rs.getString("writer_name"),
                     rs.getString("content"),
                     rs.getString("pwd"),
-                    rs.getTimestamp("createdAt").toLocalDateTime(),
+                    rs.getTimestamp("created_at").toLocalDateTime(),
                     rs.getTimestamp("modified_at").toLocalDateTime()
             ), id);
         } catch (EmptyResultDataAccessException e) {
@@ -71,8 +73,8 @@ public class JdbcPlanRepository implements PlanRepository {
         return jdbc.query(sql, (rs, rowNum) -> new PlanResponseDto(
                 rs.getLong("id"),
                 rs.getString("content"),
-                rs.getString("writer"),
-                rs.getTimestamp("createdAt").toLocalDateTime(),
+                rs.getString("writer_name"),
+                rs.getTimestamp("created_at").toLocalDateTime(),
                 rs.getTimestamp("modified_at").toLocalDateTime()
         ));
     }
@@ -80,16 +82,47 @@ public class JdbcPlanRepository implements PlanRepository {
     @Override
     public int update(Long id, Plan plan) {
         String sql = "UPDATE Plan " +
-                "SET content = ?, modified_at = ?" +
+                "SET content = ?, writer_name = ?, modified_at = ?" +
                 "WHERE id = ?";
-        return jdbc.update(sql, plan.content(), Timestamp.valueOf(LocalDateTime.now()), id);
+        return jdbc.update(sql, plan.content(), plan.writerName(), Timestamp.valueOf(LocalDateTime.now()), id);
     }
 
     @Override
     public int deleteById(Long id) {
-        String sql = "DELETE FROM" +
-                "Plan" +
+        String sql = "DELETE FROM " +
+                "Plan " +
                 "WHERE id = ?";
         return jdbc.update(sql, id);
+    }
+
+    public List<PlanResponseDto> findAll(LocalDate updatedAt, String writerName) {
+        StringBuilder sql = new StringBuilder("SELECT * FROM Plan");
+        List<Object> params = new ArrayList<>();
+        List<String> conditions = new ArrayList<>();
+
+        if (updatedAt != null) {
+            conditions.add("DATE(modified_at) = ?");
+            params.add(updatedAt);
+        }
+        if (writerName != null) {
+            conditions.add("writer_name = ?");
+            params.add(writerName);
+        }
+        if (!conditions.isEmpty()) {
+            sql.append(" WHERE ").append(String.join(" AND ", conditions));
+        }
+        sql.append(" ORDER BY modified_at DESC");
+
+        return jdbc.query(
+            sql.toString(),
+            (rs, rowNum) -> new PlanResponseDto(
+                rs.getLong("id"),
+                rs.getString("content"),
+                rs.getString("writer_name"),
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                rs.getTimestamp("modified_at").toLocalDateTime()
+            ),
+            params.toArray()
+        );
     }
 }

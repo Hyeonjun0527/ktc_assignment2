@@ -26,6 +26,12 @@ public class PlanController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
+    /**
+     *
+     * @param updatedAt ex : 2025-05-25
+     * @param writerName
+     * @return
+     */
     @GetMapping
     public ResponseEntity<List<PlanResponseDto>> getAllPlans(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate updatedAt,
@@ -44,8 +50,8 @@ public class PlanController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePlan(@PathVariable Long id, @RequestParam String password) {
-        planService.deletePlan(id, password);
+    public ResponseEntity<Void> deletePlan(@PathVariable Long id, @RequestBody String pwd) {
+        planService.deletePlan(id, pwd);
         return ResponseEntity.noContent().build();
     }
 } 

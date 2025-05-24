@@ -41,7 +41,7 @@ public class DefaultPlanService implements PlanService {
     }
 
     public List<PlanResponseDto> getAllPlans(LocalDate updatedAt, String writerName) {
-        return planRepository.findAll();
+        return planRepository.findAll(updatedAt, writerName);
     }
 
     @Transactional
@@ -72,4 +72,5 @@ public class DefaultPlanService implements PlanService {
     public void deletePlan(Long id, String password) {
         planRepository.deleteById(id);
     }
+
 } 
