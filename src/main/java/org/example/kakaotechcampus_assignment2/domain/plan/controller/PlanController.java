@@ -10,6 +10,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
 import java.time.LocalDate;
 
@@ -31,7 +32,7 @@ public class PlanController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createPlan(@RequestBody PlanCreateRequestDto request) {
+    public ResponseEntity<String> createPlan(@RequestBody @Valid PlanCreateRequestDto request) {
         planService.createPlan(request);
         return ResponseEntity.status(HttpStatus.CREATED).body("생성되었습니다.");
     }
@@ -46,7 +47,7 @@ public class PlanController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updatePlan(@PathVariable Long id, @RequestBody PlanUpdateRequestDto request) {
+    public ResponseEntity<String> updatePlan(@PathVariable Long id, @RequestBody @Valid PlanUpdateRequestDto request) {
         PlanResponseDto updatedPlan = planService.updatePlan(id, request);
         if (updatedPlan == null) {
             return ResponseEntity.notFound().build();

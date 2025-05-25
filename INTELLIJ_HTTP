@@ -54,7 +54,8 @@ PUT http://localhost:8080/api/plans/1
 Content-Type: application/json
 
 {
-  "content": "2"
+  "content": "2",
+  "pwd" : "pw2345",
 }
 
 <> 2025-05-25T014933.200.json
