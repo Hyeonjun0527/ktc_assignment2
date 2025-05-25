@@ -4,7 +4,8 @@ Content-Type: application/json
 
 {
   "content": "1",
-  "memberEmail": "test@example.com",
+  "memberEmail": "asdkffsad@naver.com",
+  "memberName": "asdf",
   "pwd": "1234"
 }
 
@@ -14,57 +15,64 @@ GET http://localhost:8080/api/plans?memberId=1
 Content-Type: application/json
 
 
+
 ###
 GET http://localhost:8080/api/plans?modifiedAt=2025-05-25
 Content-Type: application/json
+
 
 
 ###
 GET http://localhost:8080/api/plans?modifiedAt=2025-05-25&memberId=1
 Content-Type: application/json
 
-<> 2025-05-25T013400.200.json
-<> 2025-05-25T013257.400.json
-<> 2025-05-25T013237.400.json
 
 ###
 GET http://localhost:8080/api/plans?page=3&size=10
 Content-Type: application/json
 
+
 ###
 GET http://localhost:8080/api/plans?memberId=1&page=1&size=3
 Content-Type: application/json
+
 
 ###
 GET http://localhost:8080/api/plans?memberId=2&page=2&size=4
 Content-Type: application/json
 
-###
-GET http://localhost:8080/api/plans?memberId=3&page=1&size=10
+
+### 모든 페이지 개수 30개 총 페이지수 3개 페이지 사이즈 10
+GET http://localhost:8080/api/plans?page=1&size=10
 Content-Type: application/json
+
+
+### 홍길동이 작성한 모든 페이지 개수 11개 페이지사이즈10
+GET http://localhost:8080/api/plans?memberId=1&page=1&size=10
+Content-Type: application/json
+
 
 ###
 GET http://localhost:8080/api/plans/1
 Content-Type: application/json
 
-<> 2025-05-25T013751.500.json
 
 ###
-PUT http://localhost:8080/api/plans/1
+PUT http://localhost:8080/api/plans/5
 Content-Type: application/json
 
 {
   "content": "2",
-  "pwd" : "pw2345",
+  "pwd" : "pw5678"
 }
 
-<> 2025-05-25T014933.200.json
-<> 2025-05-25T014856.200.json
-<> 2025-05-25T014727.405.json
 
 ###
-DELETE http://localhost:8080/api/plans/1?password=1234
+DELETE http://localhost:8080/api/plans/1?pwd=p1234
 Content-Type: application/json
 
-<> 2025-05-25T015509.500.json
-<> 2025-05-25T015450.400.json
+
+###
+DELETE http://localhost:8080/api/plans/1?pwd=pw1234
+Content-Type: application/json
+
