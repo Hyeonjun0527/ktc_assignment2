@@ -30,14 +30,14 @@ public class JdbcPlanRepository implements PlanRepository {
             rs.getString("content"),
             rs.getString("pwd"),
             rs.getTimestamp("created_at").toLocalDateTime(),
-            rs.getTimestamp("modified_at").toLocalDateTime()
+            rs.getTimestamp("updated_at").toLocalDateTime()
     );
 
     @Override
     public void save(Plan plan) {
         LocalDateTime now = LocalDateTime.now();
         String sql = """
-                INSERT INTO Plan (member_id, content, pwd, created_at, modified_at)
+                INSERT INTO Plan (member_id, content, pwd, created_at, updated_at)
                 VALUES (?, ?, ?, ?, ?)
                 """;
         Long memberId = null;
@@ -59,7 +59,7 @@ public class JdbcPlanRepository implements PlanRepository {
                     p.id AS plan_id,
                     p.content AS plan_content,
                     p.created_at AS plan_created_at,
-                    p.modified_at AS plan_modified_at,
+                    p.updated_at AS plan_updated_at,
                     m.name AS member_name,
                     m.email AS member_email
                 FROM
@@ -78,7 +78,7 @@ public class JdbcPlanRepository implements PlanRepository {
                 ),
                 rs.getString("plan_content"),
                 rs.getTimestamp("plan_created_at").toLocalDateTime(),
-                rs.getTimestamp("plan_modified_at").toLocalDateTime()
+                rs.getTimestamp("plan_updated_at").toLocalDateTime()
             ), id);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -89,7 +89,7 @@ public class JdbcPlanRepository implements PlanRepository {
     public Plan findPlanEntityById(Long id) {
         String sql = """
                 SELECT
-                    p.id, p.content, p.pwd, p.created_at, p.modified_at,
+                    p.id, p.content, p.pwd, p.created_at, p.updated_at,
                     m.name AS member_name, m.email AS member_email
                 FROM
                     Plan p
@@ -111,7 +111,7 @@ public class JdbcPlanRepository implements PlanRepository {
                 UPDATE Plan
                 SET
                     content = ?,
-                    modified_at = ?
+                    updated_at = ?
                 WHERE
                     id = ?
                 """;
@@ -134,7 +134,7 @@ public class JdbcPlanRepository implements PlanRepository {
                 p.id AS plan_id, 
                 p.content AS plan_content,
                 p.created_at AS plan_created_at,
-                p.modified_at AS plan_modified_at, 
+                p.updated_at AS plan_updated_at, 
                 m.name AS member_name,
                 m.email AS member_email
             FROM Plan p LEFT JOIN Member m ON p.member_id = m.id
@@ -142,11 +142,11 @@ public class JdbcPlanRepository implements PlanRepository {
         );
     }
 
-    private List<String> makeConditions(LocalDate modifiedAt, Long memberId, List<Object> params) {
+    private List<String> makeConditions(LocalDate updatedAt, Long memberId, List<Object> params) {
         List<String> conditions = new ArrayList<>();
-        if (modifiedAt != null) {
-            conditions.add("DATE(p.modified_at) = ?");
-            params.add(modifiedAt);
+        if (updatedAt != null) {
+            conditions.add("DATE(p.updated_at) = ?");
+            params.add(updatedAt);
         }
         if (memberId != null) {
             conditions.add("p.member_id = ?");
@@ -164,7 +164,7 @@ public class JdbcPlanRepository implements PlanRepository {
         if (!conditions.isEmpty()) {
             sql.append(" WHERE ").append(String.join(" AND ", conditions));
         }
-        sql.append(" ORDER BY p.modified_at DESC LIMIT ? OFFSET ?");
+        sql.append(" ORDER BY p.updated_at DESC LIMIT ? OFFSET ?");
         params.add(limit);
         params.add(offset);
 
@@ -176,12 +176,12 @@ public class JdbcPlanRepository implements PlanRepository {
             ),
             rs.getString("plan_content"),
             rs.getTimestamp("plan_created_at").toLocalDateTime(),
-            rs.getTimestamp("plan_modified_at").toLocalDateTime()
+            rs.getTimestamp("plan_updated_at").toLocalDateTime()
         ), params.toArray());
     }
 
     @Override
-    public long countFilteredPlans(LocalDate modifiedAt, Long memberId) {
+    public long countFilteredPlans(LocalDate updatedAt, Long memberId) {
         List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
                 """
@@ -190,7 +190,7 @@ public class JdbcPlanRepository implements PlanRepository {
                 LEFT JOIN Member m
                 ON p.member_id = m.id
                 """);
-        List<String> conditions = makeConditions(modifiedAt, memberId, params);
+        List<String> conditions = makeConditions(updatedAt, memberId, params);
 
         if (!conditions.isEmpty()) {
             sql.append(" WHERE ").append(String.join(" AND ", conditions));
