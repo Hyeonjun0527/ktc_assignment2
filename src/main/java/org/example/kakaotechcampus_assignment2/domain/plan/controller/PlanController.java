@@ -27,16 +27,15 @@ public class PlanController {
     }
 
     /**
-     *
      * @param updatedAt ex : 2025-05-25
-     * @param writerName
+     * @param memberId
      * @return
      */
     @GetMapping
     public ResponseEntity<List<PlanResponseDto>> getAllPlans(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate updatedAt,
-            @RequestParam(required = false) String writerName) {
-        return ResponseEntity.ok(planService.getAllPlans(updatedAt, writerName));
+            @RequestParam(required = false) Long memberId) {
+        return ResponseEntity.ok(planService.getAllPlans(updatedAt, memberId));
     }
 
     @GetMapping("/{id}")
@@ -45,13 +44,17 @@ public class PlanController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PlanResponseDto> updatePlan(@PathVariable Long id, @RequestBody PlanUpdateRequestDto request) {
-        return ResponseEntity.ok(planService.updatePlan(id, request));
+    public ResponseEntity<PlanResponseDto> updatePlan(@PathVariable Long id,
+                                                      @RequestBody PlanUpdateRequestDto request,
+                                                      @RequestParam Long memberId) {
+        return ResponseEntity.ok(planService.updatePlan(id, request, memberId));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePlan(@PathVariable Long id, @RequestBody String pwd) {
-        planService.deletePlan(id, pwd);
+    public ResponseEntity<Void> deletePlan(@PathVariable Long id,
+                                             @RequestParam String pwd,
+                                             @RequestParam Long memberId) {
+        planService.deletePlan(id, pwd, memberId);
         return ResponseEntity.noContent().build();
     }
 } 

@@ -1,5 +1,8 @@
 package org.example.kakaotechcampus_assignment2.domain.plan.service;
 
+import lombok.RequiredArgsConstructor;
+import org.example.kakaotechcampus_assignment2.domain.member.entity.Member;
+import org.example.kakaotechcampus_assignment2.domain.member.repository.MemberRepository;
 import org.example.kakaotechcampus_assignment2.domain.plan.dto.PlanCreateRequestDto;
 import org.example.kakaotechcampus_assignment2.domain.plan.dto.PlanResponseDto;
 import org.example.kakaotechcampus_assignment2.domain.plan.dto.PlanUpdateRequestDto;
@@ -8,25 +11,25 @@ import org.example.kakaotechcampus_assignment2.domain.plan.repository.PlanReposi
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class DefaultPlanService implements PlanService {
 
     private final PlanRepository planRepository;
+    private final MemberRepository memberRepository;
 
     @Transactional
+    @Override
     public void createPlan(PlanCreateRequestDto request) {
+        Member member = memberRepository.findByEmail(request.memberEmail());
+
         Plan planToSave = new Plan(
                 null,
-                request.writerName(),
+                member.id(),
                 request.content(),
                 request.pwd(),
                 LocalDateTime.now(),
@@ -35,42 +38,38 @@ public class DefaultPlanService implements PlanService {
         planRepository.save(planToSave);
     }
 
+    @Override
     public PlanResponseDto getPlanById(Long id) {
-        PlanResponseDto planResponseDto = planRepository.findById(id);
-        return planResponseDto;
+        return planRepository.findById(id);
     }
 
-    public List<PlanResponseDto> getAllPlans(LocalDate updatedAt, String writerName) {
-        return planRepository.findAll(updatedAt, writerName);
+    @Override
+    public List<PlanResponseDto> getAllPlans(LocalDate modifiedAt, Long memberId) {
+        return planRepository.findAllByCondition(modifiedAt, memberId);
     }
 
     @Transactional
-    public PlanResponseDto updatePlan(Long id, PlanUpdateRequestDto request) {
-        Plan existingPlan = planRepository.findPlanEntityById(id);
-
-        //POLICY : 이름과 컨텐트가 null인 경우 기존 값을 유지
-        String newWriterName = request.writerName() != null ? request.writerName() : existingPlan.writerName();
-        String newContent = request.content() != null ? request.content() : existingPlan.content();
-
+    @Override
+    public PlanResponseDto updatePlan(Long planId, PlanUpdateRequestDto request, Long memberId) {
+        Plan existingPlan = planRepository.findPlanEntityById(planId);
+        
         Plan planToUpdate = new Plan(
                 existingPlan.id(),
-                newWriterName,
-                newContent,
+                existingPlan.memberId(),
+                request.content(),
                 existingPlan.pwd(),
                 existingPlan.createdAt(),
                 LocalDateTime.now()
         );
 
-        int updatedRows = planRepository.update(id, planToUpdate);
-        log.info("updatedRows: {}", updatedRows);
+        planRepository.update(planId, planToUpdate);
 
-        PlanResponseDto updatedPlanResponseDto = planRepository.findById(id);
-        return updatedPlanResponseDto;
+        return planRepository.findById(planId);
     }
 
     @Transactional
-    public void deletePlan(Long id, String password) {
+    @Override
+    public void deletePlan(Long id, String pwd, Long memberId) {
         planRepository.deleteById(id);
     }
-
 } 

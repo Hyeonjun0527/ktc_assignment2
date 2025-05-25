@@ -12,7 +12,7 @@ public interface PlanRepository {
 
     List<PlanResponseDto> findAll();
 
-    List<PlanResponseDto> findAll(LocalDate updatedAt, String writerName);
+    List<PlanResponseDto> findAllByCondition(LocalDate updatedAt, Long memberId);
 
     PlanResponseDto findById(Long id);
 

@@ -13,9 +13,9 @@ public interface PlanService {
 
     PlanResponseDto getPlanById(Long id);
 
-    List<PlanResponseDto> getAllPlans(LocalDate updatedAt, String writerName);
+    List<PlanResponseDto> getAllPlans(LocalDate modifiedAt, Long memberId);
 
-    PlanResponseDto updatePlan(Long id, PlanUpdateRequestDto request);
+    PlanResponseDto updatePlan(Long planId, PlanUpdateRequestDto request, Long memberId);
 
-    void deletePlan(Long id, String password);
+    void deletePlan(Long planId, String pwd, Long memberId);
 } 

@@ -6,6 +6,7 @@ public record PlanResponseDto(
     Long id,
     String content,
     String writerName,
+    Long memberId,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {
