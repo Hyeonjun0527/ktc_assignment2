@@ -12,7 +12,9 @@ public interface PlanRepository {
 
     List<PlanResponseDto> findAll();
 
-    List<PlanResponseDto> findAllByCondition(LocalDate updatedAt, Long memberId);
+    List<PlanResponseDto> findAll(LocalDate modifiedAt, Long memberId, int offset, int limit);
+
+    long countFilteredPlans(LocalDate modifiedAt, Long memberId);
 
     PlanResponseDto findById(Long id);
 

@@ -131,9 +131,8 @@ public class JdbcPlanRepository implements PlanRepository {
         return jdbc.update(sql, id);
     }
 
-    @Override
-    public List<PlanResponseDto> findAllByCondition(LocalDate modifiedAt, Long memberId) {
-        StringBuilder sql = new StringBuilder(
+    private StringBuilder makeQuery() {
+        return new StringBuilder(
             """
             SELECT 
                 p.id AS plan_id, 
@@ -145,9 +144,10 @@ public class JdbcPlanRepository implements PlanRepository {
             FROM Plan p JOIN Member m ON p.member_id = m.id
             """
         );
-        List<Object> params = new ArrayList<>();
-        List<String> conditions = new ArrayList<>();
+    }
 
+    private List<String> makeConditions(LocalDate modifiedAt, Long memberId, List<Object> params) {
+        List<String> conditions = new ArrayList<>();
         if (modifiedAt != null) {
             conditions.add("DATE(p.modified_at) = ?");
             params.add(modifiedAt);
@@ -156,12 +156,42 @@ public class JdbcPlanRepository implements PlanRepository {
             conditions.add("p.member_id = ?");
             params.add(memberId);
         }
+        return conditions;
+    }
+
+    @Override
+    public List<PlanResponseDto> findAll(LocalDate modifiedAt, Long memberId, int offset, int limit) {
+        List<Object> params = new ArrayList<>();
+        StringBuilder sql = makeQuery();
+        List<String> conditions = makeConditions(modifiedAt, memberId, params);
 
         if (!conditions.isEmpty()) {
             sql.append(" WHERE ").append(String.join(" AND ", conditions));
         }
-        sql.append(" ORDER BY p.modified_at DESC");
+        sql.append(" ORDER BY p.modified_at DESC LIMIT ? OFFSET ?");
+        params.add(limit);
+        params.add(offset);
 
         return jdbc.query(sql.toString(), planResponseDtoRowMapper, params.toArray());
+    }
+
+    @Override
+    public long countFilteredPlans(LocalDate modifiedAt, Long memberId) {
+        List<Object> params = new ArrayList<>();
+        StringBuilder sql = new StringBuilder(
+                """
+                SELECT COUNT(*)
+                FROM Plan p
+                JOIN Member m
+                ON p.member_id = m.id
+                """);
+        List<String> conditions = makeConditions(modifiedAt, memberId, params);
+
+        if (!conditions.isEmpty()) {
+            sql.append(" WHERE ").append(String.join(" AND ", conditions));
+        }
+
+        Long count = jdbc.queryForObject(sql.toString(), Long.class, params.toArray());
+        return count != null ? count : 0L;
     }
 }
