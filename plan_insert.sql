@@ -12,7 +12,7 @@ CREATE TABLE Plan (
     member_id BIGINT NULL,
     pwd VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    modified_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 
@@ -21,7 +21,7 @@ CREATE TABLE member (
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     created_at TIMESTAMP NOT NULL,
-    modified_at TIMESTAMP NOT NULL
+    updated_at TIMESTAMP NOT NULL
 );
 
 ALTER TABLE plan ADD CONSTRAINT fk_plan_member FOREIGN KEY (member_id) REFERENCES member(id);
@@ -31,12 +31,12 @@ ALTER TABLE Plan CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ALTER TABLE member CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- 회원 선삽입
-INSERT INTO member (id, name, email, created_at, modified_at) VALUES
+INSERT INTO member (id, name, email, created_at, updated_at) VALUES
 (1, '홍길동', 'hong1@example.com', NOW(), NOW()),
 (2, '김철수', 'kim2@example.com', NOW(), NOW()),
 (3, '이영희', 'lee3@example.com', NOW(), NOW());
 
-INSERT INTO Plan (member_id, content, pwd, created_at, modified_at) VALUES
+INSERT INTO Plan (member_id, content, pwd, created_at, updated_at) VALUES
 (1, '스터디 계획 1', 'pw1234', NOW(), NOW()),
 (2, '스터디 계획 2', 'pw2345', NOW(), NOW()),
 (1, '스터디 계획 3', 'pw3456', NOW(), NOW()),
