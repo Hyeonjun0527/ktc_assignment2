@@ -7,6 +7,7 @@ import org.example.kakaotechcampus_assignment2.domain.plan.dto.PageResponseDto;
 import org.example.kakaotechcampus_assignment2.domain.plan.dto.PlanCreateRequestDto;
 import org.example.kakaotechcampus_assignment2.domain.plan.dto.PlanResponseDto;
 import org.example.kakaotechcampus_assignment2.domain.plan.dto.PlanUpdateRequestDto;
+import org.example.kakaotechcampus_assignment2.domain.plan.entity.AuthorInfo;
 import org.example.kakaotechcampus_assignment2.domain.plan.entity.Plan;
 import org.example.kakaotechcampus_assignment2.domain.plan.repository.PlanRepository;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -28,10 +30,15 @@ public class DefaultPlanService implements PlanService {
     @Override
     public void createPlan(PlanCreateRequestDto request) {
         Member member = memberRepository.findByEmail(request.memberEmail());
-
+        AuthorInfo authorInfo;
+        if (member == null) {
+            authorInfo = new AuthorInfo(null, null);
+        } else {
+            authorInfo = new AuthorInfo(member.name(), member.email());
+        }
         Plan planToSave = new Plan(
                 null,
-                member.id(),
+                authorInfo,
                 request.content(),
                 request.pwd(),
                 LocalDateTime.now(),
@@ -46,12 +53,24 @@ public class DefaultPlanService implements PlanService {
 
     @Transactional
     @Override
-    public PlanResponseDto updatePlan(Long planId, PlanUpdateRequestDto request, Long memberId) {
+    public PlanResponseDto updatePlan(Long planId, PlanUpdateRequestDto request) {
         Plan existingPlan = planRepository.findPlanEntityById(planId);
+
+        if (existingPlan == null) {
+            return null;
+        }
+
+        if (!Objects.equals(existingPlan.authorInfo().name(), request.memberId())) {
+            return null;
+        }
+
+        if (!Objects.equals(existingPlan.pwd(), request.pwd())) {
+            return null;
+        }
 
         Plan planToUpdate = new Plan(
                 existingPlan.id(),
-                existingPlan.memberId(),
+                existingPlan.authorInfo(),
                 request.content(),
                 existingPlan.pwd(),
                 existingPlan.createdAt(),

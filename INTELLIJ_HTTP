@@ -1,69 +1,52 @@
 ###
-POST http://localhost:8080/api/matching/auto/run
-Content-Type: application/json
-
-{
-  "matchingKValue": "1",
-  "numberOfNearestNeighbors": "3",
-  "matchingTemplateId": "1",
-  "chunkSize": "1000",
-  "saveResultsChunkSize": "100"
-}
-
-<> 2025-05-19T200314.500.html
-<> 2025-05-16T200351.200.json
-
-###
 POST http://localhost:8080/api/plans
 Content-Type: application/json
 
 {
   "content": "1",
-  "writerName": "현준",
+  "memberEmail": "test@example.com",
   "pwd": "1234"
 }
 
-<> 2025-05-25T010850.500.json
-<> 2025-05-25T010601.500.json
-<> 2025-05-25T010156.500.json
-<> 2025-05-24T195254.500.json
-<> 2025-05-24T194950.500.json
-<> 2025-05-24T194656.500.json
 
 ###
-GET http://localhost:8080/api/plans?
-    writerName=홍길동
+GET http://localhost:8080/api/plans?memberId=1
 Content-Type: application/json
 
-<> 2025-05-25T014439.200.json
-<> 2025-05-25T013430.200.json
-<> 2025-05-25T013129.200.json
 
 ###
-GET http://localhost:8080/api/plans?
-    updatedAt=2025-05-25
+GET http://localhost:8080/api/plans?modifiedAt=2025-05-25
 Content-Type: application/json
+
 
 ###
-GET http://localhost:8080/api/plans?
-    updatedAt=2025-05-25
-    &writerName=홍길동
+GET http://localhost:8080/api/plans?modifiedAt=2025-05-25&memberId=1
 Content-Type: application/json
 
-<> 2025-05-25T013426.200.json
 <> 2025-05-25T013400.200.json
 <> 2025-05-25T013257.400.json
 <> 2025-05-25T013237.400.json
 
 ###
+GET http://localhost:8080/api/plans?page=3&size=10
+Content-Type: application/json
+
+###
+GET http://localhost:8080/api/plans?memberId=1&page=1&size=3
+Content-Type: application/json
+
+###
+GET http://localhost:8080/api/plans?memberId=2&page=2&size=4
+Content-Type: application/json
+
+###
+GET http://localhost:8080/api/plans?memberId=3&page=1&size=10
+Content-Type: application/json
+
+###
 GET http://localhost:8080/api/plans/1
 Content-Type: application/json
 
-<> 2025-05-25T014724.200.json
-<> 2025-05-25T014627.500.json
-<> 2025-05-25T014445.500.json
-<> 2025-05-25T013856.500.json
-<> 2025-05-25T013841.500.json
 <> 2025-05-25T013751.500.json
 
 ###
@@ -71,9 +54,7 @@ PUT http://localhost:8080/api/plans/1
 Content-Type: application/json
 
 {
-    "content": "2",
-    "writerName": "현준",
-    "pwd": "1234"
+  "content": "2"
 }
 
 <> 2025-05-25T014933.200.json
@@ -81,12 +62,8 @@ Content-Type: application/json
 <> 2025-05-25T014727.405.json
 
 ###
-DELETE http://localhost:8080/api/plans/1
+DELETE http://localhost:8080/api/plans/1?password=1234
 Content-Type: application/json
-
-{
-  "pwd": "1234"
-}
 
 <> 2025-05-25T015509.500.json
 <> 2025-05-25T015450.400.json

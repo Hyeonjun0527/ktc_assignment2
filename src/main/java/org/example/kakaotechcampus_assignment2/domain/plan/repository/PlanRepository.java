@@ -10,8 +10,6 @@ public interface PlanRepository {
 
     void save(Plan plan);
 
-    List<PlanResponseDto> findAll();
-
     List<PlanResponseDto> findAll(LocalDate modifiedAt, Long memberId, int offset, int limit);
 
     long countFilteredPlans(LocalDate modifiedAt, Long memberId);

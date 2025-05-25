@@ -32,8 +32,11 @@ public class JdbcMemberRepository implements MemberRepository {
                 FROM member
                 WHERE email = ?
                 """;
-        
-        return jdbcTemplate.queryForObject(sql, memberRowMapper, email);
+        try {
+            return jdbcTemplate.queryForObject(sql, memberRowMapper, email);
+        } catch (EmptyResultDataAccessException e) {
+            return null;
+        }
     }
 
     @Override

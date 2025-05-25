@@ -15,7 +15,7 @@ public interface PlanService {
 
     PageResponseDto<PlanResponseDto> getAllPlans(LocalDate modifiedAt, Long memberId, int page, int size);
 
-    PlanResponseDto updatePlan(Long planId, PlanUpdateRequestDto request, Long memberId);
+    PlanResponseDto updatePlan(Long planId, PlanUpdateRequestDto request);
 
     void deletePlan(Long planId, String pwd, Long memberId);
 

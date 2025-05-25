@@ -2,6 +2,7 @@ package org.example.kakaotechcampus_assignment2.domain.plan.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.example.kakaotechcampus_assignment2.domain.plan.dto.PlanResponseDto;
+import org.example.kakaotechcampus_assignment2.domain.plan.entity.AuthorInfo;
 import org.example.kakaotechcampus_assignment2.domain.plan.entity.Plan;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,18 +21,12 @@ public class JdbcPlanRepository implements PlanRepository {
 
     private final JdbcTemplate jdbc;
 
-    private final RowMapper<PlanResponseDto> planResponseDtoRowMapper = (rs, rowNum) -> new PlanResponseDto(
-            rs.getLong("plan_id"),
-            rs.getString("plan_content"),
-            rs.getString("member_name"),
-            rs.getLong("member_id"),
-            rs.getTimestamp("plan_created_at").toLocalDateTime(),
-            rs.getTimestamp("plan_modified_at").toLocalDateTime()
-    );
-
     private final RowMapper<Plan> planEntityRowMapper = (rs, rowNum) -> new Plan(
             rs.getLong("id"),
-            rs.getLong("member_id"),
+            new AuthorInfo(
+                rs.getString("member_name"),
+                rs.getString("member_email")
+            ),
             rs.getString("content"),
             rs.getString("pwd"),
             rs.getTimestamp("created_at").toLocalDateTime(),
@@ -45,7 +40,16 @@ public class JdbcPlanRepository implements PlanRepository {
                 INSERT INTO Plan (member_id, content, pwd, created_at, modified_at)
                 VALUES (?, ?, ?, ?, ?)
                 """;
-        jdbc.update(sql, plan.memberId(), plan.content(), plan.pwd(), Timestamp.valueOf(now), Timestamp.valueOf(now));
+        Long memberId = null;
+        if (plan.authorInfo() != null && plan.authorInfo().email() != null) {
+            String memberSql = "SELECT id FROM member WHERE email = ?";
+            try {
+                memberId = jdbc.queryForObject(memberSql, Long.class, plan.authorInfo().email());
+            } catch (EmptyResultDataAccessException e) {
+                memberId = null;
+            }
+        }
+        jdbc.update(sql, memberId, plan.content(), plan.pwd(), Timestamp.valueOf(now), Timestamp.valueOf(now));
     }
 
     @Override
@@ -54,19 +58,28 @@ public class JdbcPlanRepository implements PlanRepository {
                 SELECT
                     p.id AS plan_id,
                     p.content AS plan_content,
-                    p.member_id,
                     p.created_at AS plan_created_at,
                     p.modified_at AS plan_modified_at,
-                    m.name AS member_name
+                    m.name AS member_name,
+                    m.email AS member_email
                 FROM
                     Plan p
-                JOIN
+                LEFT JOIN
                     Member m ON p.member_id = m.id
                 WHERE
                     p.id = ?
                 """;
         try {
-            return jdbc.queryForObject(sql, planResponseDtoRowMapper, id);
+            return jdbc.queryForObject(sql, (rs, rowNum) -> new PlanResponseDto(
+                rs.getLong("plan_id"),
+                new AuthorInfo(
+                    rs.getString("member_name"),
+                    rs.getString("member_email")
+                ),
+                rs.getString("plan_content"),
+                rs.getTimestamp("plan_created_at").toLocalDateTime(),
+                rs.getTimestamp("plan_modified_at").toLocalDateTime()
+            ), id);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
@@ -76,37 +89,20 @@ public class JdbcPlanRepository implements PlanRepository {
     public Plan findPlanEntityById(Long id) {
         String sql = """
                 SELECT
-                    id, member_id, content, pwd, created_at, modified_at
+                    p.id, p.content, p.pwd, p.created_at, p.modified_at,
+                    m.name AS member_name, m.email AS member_email
                 FROM
-                    Plan
+                    Plan p
+                LEFT JOIN
+                    Member m ON p.member_id = m.id
                 WHERE
-                    id = ?
+                    p.id = ?
                 """;
         try {
             return jdbc.queryForObject(sql, planEntityRowMapper, id);
         } catch (EmptyResultDataAccessException e) {
             return null;
         }
-    }
-
-    @Override
-    public List<PlanResponseDto> findAll() {
-        String sql = """
-                SELECT
-                    p.id AS plan_id,
-                    p.content AS plan_content,
-                    p.member_id,
-                    p.created_at AS plan_created_at,
-                    p.modified_at AS plan_modified_at,
-                    m.name AS member_name
-                FROM
-                    Plan p
-                JOIN
-                    Member m ON p.member_id = m.id
-                ORDER BY
-                    p.modified_at DESC
-                """;
-        return jdbc.query(sql, planResponseDtoRowMapper);
     }
 
     @Override
@@ -117,9 +113,9 @@ public class JdbcPlanRepository implements PlanRepository {
                     content = ?,
                     modified_at = ?
                 WHERE
-                    id = ? AND member_id = ?
+                    id = ?
                 """;
-        return jdbc.update(sql, plan.content(), Timestamp.valueOf(LocalDateTime.now()), id, plan.memberId());
+        return jdbc.update(sql, plan.content(), Timestamp.valueOf(LocalDateTime.now()), id);
     }
 
     @Override
@@ -137,11 +133,11 @@ public class JdbcPlanRepository implements PlanRepository {
             SELECT 
                 p.id AS plan_id, 
                 p.content AS plan_content,
-                p.member_id,
                 p.created_at AS plan_created_at,
                 p.modified_at AS plan_modified_at, 
-                m.name AS member_name
-            FROM Plan p JOIN Member m ON p.member_id = m.id
+                m.name AS member_name,
+                m.email AS member_email
+            FROM Plan p LEFT JOIN Member m ON p.member_id = m.id
             """
         );
     }
@@ -172,7 +168,16 @@ public class JdbcPlanRepository implements PlanRepository {
         params.add(limit);
         params.add(offset);
 
-        return jdbc.query(sql.toString(), planResponseDtoRowMapper, params.toArray());
+        return jdbc.query(sql.toString(), (rs, rowNum) -> new PlanResponseDto(
+            rs.getLong("plan_id"),
+            new AuthorInfo(
+                rs.getString("member_name"),
+                rs.getString("member_email")
+            ),
+            rs.getString("plan_content"),
+            rs.getTimestamp("plan_created_at").toLocalDateTime(),
+            rs.getTimestamp("plan_modified_at").toLocalDateTime()
+        ), params.toArray());
     }
 
     @Override
@@ -182,7 +187,7 @@ public class JdbcPlanRepository implements PlanRepository {
                 """
                 SELECT COUNT(*)
                 FROM Plan p
-                JOIN Member m
+                LEFT JOIN Member m
                 ON p.member_id = m.id
                 """);
         List<String> conditions = makeConditions(modifiedAt, memberId, params);
