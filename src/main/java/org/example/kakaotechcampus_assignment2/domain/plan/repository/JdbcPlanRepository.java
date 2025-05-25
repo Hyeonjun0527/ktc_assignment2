@@ -24,7 +24,7 @@ public class JdbcPlanRepository implements PlanRepository {
         LocalDateTime now = LocalDateTime.now();
 
         String sql = "INSERT INTO " +
-                 "Plan (content, writer_name, pwd, created_at, modified_at) " +
+                 "Plan (content, writer_name, pwd, created_at, updated_at) " +
                  "VALUES (?, ?, ?, ?, ?)";
         jdbc.update(sql, plan.content(), plan.writerName(), plan.pwd(), Timestamp.valueOf(now), Timestamp.valueOf(now));
     }
@@ -40,7 +40,7 @@ public class JdbcPlanRepository implements PlanRepository {
                     rs.getString("content"),
                     rs.getString("writer_name"),
                     rs.getTimestamp("created_at").toLocalDateTime(),
-                    rs.getTimestamp("modified_at").toLocalDateTime()
+                    rs.getTimestamp("updated_at").toLocalDateTime()
             ), id);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -58,7 +58,7 @@ public class JdbcPlanRepository implements PlanRepository {
                     rs.getString("content"),
                     rs.getString("pwd"),
                     rs.getTimestamp("created_at").toLocalDateTime(),
-                    rs.getTimestamp("modified_at").toLocalDateTime()
+                    rs.getTimestamp("updated_at").toLocalDateTime()
             ), id);
         } catch (EmptyResultDataAccessException e) {
             return null;
@@ -69,20 +69,20 @@ public class JdbcPlanRepository implements PlanRepository {
     public List<PlanResponseDto> findAll() {
         String sql = "SELECT *" +
                      "FROM Plan p " +
-                     "ORDER BY p.modified_at DESC";
+                     "ORDER BY p.updated_at DESC";
         return jdbc.query(sql, (rs, rowNum) -> new PlanResponseDto(
                 rs.getLong("id"),
                 rs.getString("content"),
                 rs.getString("writer_name"),
                 rs.getTimestamp("created_at").toLocalDateTime(),
-                rs.getTimestamp("modified_at").toLocalDateTime()
+                rs.getTimestamp("updated_at").toLocalDateTime()
         ));
     }
 
     @Override
     public int update(Long id, Plan plan) {
         String sql = "UPDATE Plan " +
-                "SET content = ?, writer_name = ?, modified_at = ?" +
+                "SET content = ?, writer_name = ?, updated_at = ?" +
                 "WHERE id = ?";
         return jdbc.update(sql, plan.content(), plan.writerName(), Timestamp.valueOf(LocalDateTime.now()), id);
     }
@@ -101,7 +101,7 @@ public class JdbcPlanRepository implements PlanRepository {
         List<String> conditions = new ArrayList<>();
 
         if (updatedAt != null) {
-            conditions.add("DATE(modified_at) = ?");
+            conditions.add("DATE(updated_at) = ?");
             params.add(updatedAt);
         }
         if (writerName != null) {
@@ -111,7 +111,7 @@ public class JdbcPlanRepository implements PlanRepository {
         if (!conditions.isEmpty()) {
             sql.append(" WHERE ").append(String.join(" AND ", conditions));
         }
-        sql.append(" ORDER BY modified_at DESC");
+        sql.append(" ORDER BY updated_at DESC");
 
         return jdbc.query(
             sql.toString(),
@@ -120,7 +120,7 @@ public class JdbcPlanRepository implements PlanRepository {
                 rs.getString("content"),
                 rs.getString("writer_name"),
                 rs.getTimestamp("created_at").toLocalDateTime(),
-                rs.getTimestamp("modified_at").toLocalDateTime()
+                rs.getTimestamp("updated_at").toLocalDateTime()
             ),
             params.toArray()
         );
