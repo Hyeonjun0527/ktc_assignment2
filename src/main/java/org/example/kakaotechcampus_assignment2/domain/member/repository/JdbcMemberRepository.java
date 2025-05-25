@@ -22,13 +22,13 @@ public class JdbcMemberRepository implements MemberRepository {
             rs.getString("name"),
             rs.getString("email"),
             rs.getTimestamp("created_at").toLocalDateTime(),
-            rs.getTimestamp("modified_at").toLocalDateTime()
+            rs.getTimestamp("updated_at").toLocalDateTime()
     );
 
     @Override
     public Member findByEmail(String email) {
         String sql = """
-                SELECT id, name, email, created_at, modified_at
+                SELECT id, name, email, created_at, updated_at
                 FROM member
                 WHERE email = ?
                 """;
@@ -43,7 +43,7 @@ public class JdbcMemberRepository implements MemberRepository {
     public Member save(Member member) {
         LocalDateTime now = LocalDateTime.now();
         String sql = """
-                INSERT INTO member (name, email, created_at, modified_at)
+                INSERT INTO member (name, email, created_at, updated_at)
                 VALUES (?, ?, ?, ?)
                 """;
         
