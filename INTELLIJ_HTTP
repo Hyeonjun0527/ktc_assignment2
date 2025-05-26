@@ -4,10 +4,10 @@ Content-Type: application/json
 
 {
   "content": "1",
-  "memberEmail": "test@example.com",
+  "memberEmail": "asdkffsad@naver.com",
+  "memberName": "asdf",
   "pwd": "1234"
 }
-
 
 
 ###
@@ -57,14 +57,13 @@ GET http://localhost:8080/api/plans/1
 Content-Type: application/json
 
 
-
 ###
-PUT http://localhost:8080/api/plans/1
+PUT http://localhost:8080/api/plans/5
 Content-Type: application/json
 
 {
   "content": "2",
-  "pwd" : "pw1234"
+  "pwd" : "pw5678"
 }
 
 
@@ -76,3 +75,4 @@ Content-Type: application/json
 ###
 DELETE http://localhost:8080/api/plans/1?pwd=pw1234
 Content-Type: application/json
+

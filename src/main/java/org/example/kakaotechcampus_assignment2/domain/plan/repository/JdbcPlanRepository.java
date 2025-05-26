@@ -142,11 +142,11 @@ public class JdbcPlanRepository implements PlanRepository {
         );
     }
 
-    private List<String> makeConditions(LocalDate updatedAt, Long memberId, List<Object> params) {
+    private List<String> makeConditions(LocalDate modifiedAt, Long memberId, List<Object> params) {
         List<String> conditions = new ArrayList<>();
-        if (updatedAt != null) {
+        if (modifiedAt != null) {
             conditions.add("DATE(p.updated_at) = ?");
-            params.add(updatedAt);
+            params.add(modifiedAt);
         }
         if (memberId != null) {
             conditions.add("p.member_id = ?");
@@ -181,7 +181,7 @@ public class JdbcPlanRepository implements PlanRepository {
     }
 
     @Override
-    public long countFilteredPlans(LocalDate updatedAt, Long memberId) {
+    public long countFilteredPlans(LocalDate modifiedAt, Long memberId) {
         List<Object> params = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
                 """
@@ -190,7 +190,7 @@ public class JdbcPlanRepository implements PlanRepository {
                 LEFT JOIN Member m
                 ON p.member_id = m.id
                 """);
-        List<String> conditions = makeConditions(updatedAt, memberId, params);
+        List<String> conditions = makeConditions(modifiedAt, memberId, params);
 
         if (!conditions.isEmpty()) {
             sql.append(" WHERE ").append(String.join(" AND ", conditions));

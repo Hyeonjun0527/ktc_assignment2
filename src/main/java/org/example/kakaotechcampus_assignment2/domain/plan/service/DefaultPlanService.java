@@ -31,12 +31,11 @@ public class DefaultPlanService implements PlanService {
     @Override
     public void createPlan(PlanCreateRequestDto request) {
         Member member = memberRepository.findByEmail(request.memberEmail());
-        AuthorInfo authorInfo;
         if (member == null) {
-            authorInfo = new AuthorInfo(null, null);
-        } else {
-            authorInfo = new AuthorInfo(member.name(), member.email());
+            member = new Member(null, request.memberName(), request.memberEmail(), LocalDateTime.now(), LocalDateTime.now());
+            memberRepository.save(member);
         }
+        AuthorInfo authorInfo = new AuthorInfo(member.name(), member.email());
         Plan planToSave = new Plan(
                 null,
                 authorInfo,

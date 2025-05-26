@@ -13,6 +13,10 @@ public record PlanCreateRequestDto(
     @Email(message = "이메일 형식이 올바르지 않습니다.")
     String memberEmail,
 
+    @NotBlank(message = "이름을 입력해주세요")
+    @Size(max = 20, message = "20자 내로 작성해주세요")
+    String memberName,
+
     @NotBlank(message = "비밀번호를 입력해주세요")
     String pwd
 ) {
